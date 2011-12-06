@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../../../../Classes/StatComputing/XDynDocs/inst/XSL/OmegahatXSL/Todo.xsl" ?> 
+<!--
+<?xml-stylesheet type="text/xsl" href="inst/XSL/OmegahatXSL/Todo.xsl" ?>
+-->
+
+<!--
+-->
+<?xml-stylesheet type="text/xsl" href="/Users/nolan/EMD/StatComputing/trunk/XDynDocs/inst/XSL/OmegahatXSL/Todo.xsl" ?>
+
+<topics xmlns:r="http://www.r-project.org">
+<title>RKML</title>
+
+<topic>
+<items>
+
+<item>
+The conditioning variable in the formula maps to folders.
+That's the outer by() on the data set.
+Within each folder, if there is a groups argument,
+we do a second/inner by() call using that groups argument to split the
+observations within the folder into separate groups
+and then plot those. 
+
+We use the "style" to color and format the points.  In the
+main/top-level call, if style has as many values as the number of rows,
+we use those for each individual placemark we create. In other words,
+we put style into the original data frame and when we split via the
+by's, we use those.  If style has as many elements as there are levels
+in 'groups', we can expand those into a complete set of styles based
+on the observation's value of the groups factor.
+
+If addLine is true and groups is specified, then we
+add lines connecting only the placemarks within the same group.
+Probably make this a type = "l" or "p", 
+"h" would give us an elevation and one would specify
+this in the formula as elev ~ long + lat 
+
+</item>
+
+<item>
+groups: this parameter is not recognized by kmlPoints() 
+</item>
+
+<item>
+Conditioning variable in the formula language does not seem to do anything. What I think that it should do is create folders, one for each level of the conditioning variable, and place the Placemark elements in the folder corresponding to the value of the conditioning variable. (This is what groups does, but I think it should do something else -- see other To Do item)
+</item>
+
+<item>
+groups parameter - I think that is should be used to change the style of the Icon for a point. There should be one style for each level of the grouping variable. WE can create a set of colored dots to be used so that they don't have to be supplied.
+However, they can also be supplied through the col parameter. For example, if the length of the col parameter matches the number of levels in the grouping variable then
+we take them to be the styles to use.  They could even contain color names, if we wanted to support them (for the future).
+</item>
+
+<item status="low">
+Add to the package a set of differently colored balls.
+<br/>
+Use the ones from Google. Leave as remote URLs and download them
+if we want.
+See
+http://code.google.com/p/appspot-geowiki/wiki/Icons
+http://code.google.com/p/google-maps-icons/
+http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png
+http://www.cems.uwe.ac.uk/~cjwallac/apps/phpxml/showIcons.php
+</item>
+
+<item status="check">
+Change the col parameter in kmlPoints and kmlTime to be called "style", and change the "style" parameter to be called "docStyle".  Then fix all the code that uses these old parameter names.
+</item>
+
+<item status="low">
+Allow the location of the png and other files for the document to be in a different
+place than where you want them to be at the time of the kmz file creation. 
+That is, we want to be able to specify the location of the input images and the location of the images in the kmz. 
+<br/>
+The names on the files should enable this.
+</item>
+
+<item status="low">
+When we use the kmlLegend function the quartz device opens even though it is not used.
+<br/>
+This is the initial call to par(no.readonly = TRUE)
+so we can restore the existing graphics parameters.
+</item>
+
+<item>
+?Change the default for kmlTime to drop the hour:minutes:second ,
+i.e. leave the days, 
+or to drop off the names from the points??
+<br/>
+How about providing a strptime format string
+or a function that creates the names for the points.
+Are these names or tooltips?
+</item>
+
+<item>
+Make sure all the main functions use the text approach to building the kml so 
+that it is faster (i.e. add the nodes in a lump after they have been created)
+</item>
+
+<item status="low">
+Why isn't addLines a parameter in kmlTime - instead of in the ... argument?
+<br/>
+It can be added, but this is just a programming technique that avoids
+duplicating all the parameters. The additional parameters
+are passed straight onto the next function via the ...
+<br/>
+Make certain documentation mentions the possible parameters.
+</item>
+
+<item status="done">
+Shouldn't we have the addLines parameter to kmlPoint too?
+NO. See above.
+</item>
+
+<item status="done">
+Note: There can be only one Document element in a kml file
+</item>
+
+</items>
+</topic>
+</topics>

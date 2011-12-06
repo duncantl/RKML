@@ -1,0 +1,66 @@
+<article>
+
+<para>
+The idea is to provide some high-level facilities in R to generate
+KML document for visualizing data.
+</para>
+
+<para>
+When displaying points in KML, we use styles.  The caller can create
+styles in the call or ahead of time. These styles are given ids.  The
+caller then refers to these styles in the col, lty, etc. parameters in
+the function calls.  This helps to make the interface R like (in the
+sense of col = c("red", "blue")) and separates the elements of the
+document so that we can treat it more like a database and update
+elements independently and easily.
+
+</para>
+<para>
+We might want to allow a formula interface for the function(s).
+This would allow the caller to identify the different
+variables of interest, i.e. latitude, longitude and time.
+The formula might look something like
+<r:code>
+~ x + y @ t | groups
+</r:code>
+The first and second terms are longitude and latitude.
+We "condition" on groups 
+as in lattice/trellis,
+where we can deal with another variable collectively.
+This allows us to separate different "individuals" 
+or series.
+</para>
+<para>
+We can display a sequence of points over time.  We can use a data
+frame containing longitude and latitude. We can have additional
+variables such as time and also a categorical variable (factor) for
+separating the observations into individual series, e.g. different
+animals.  We can also have other variables which we use to generate
+content for each point displayed.
+For example, we might want to use an expression of the form
+<r:expr>as.character( g(x)) ~ long + lat</r:expr>
+to indicate that the text to be displayed at the 
+specified (long, lat) pairs is computed by
+<r:expr>as.character( g(x))</r:expr>.
+</para>
+<para>
+So the goal is to support  these various different
+formula
+<r:code>
+  ~ long + lat | g
+  ~ long + lat
+  mean(x) ~ long + lat | g
+  hist(x) ~ long + lat | g
+  ~ long + lat @ time | groups
+  ~ f(long) + g(lat) @ time | groups  
+  a + b ~ long + lat @ time | groups
+  log(a) + sqrt(b) ~ long + lat @ time | groups
+</r:code>
+
+</para>
+<para>
+
+We can display the observations for a given , we 
+</para>
+
+</article>

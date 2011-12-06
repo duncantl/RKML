@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>RKML</title>
+<link rel=stylesheet href="../OmegaTech.css" >
+</head>
+
+<body>
+<p align="right"><a href="RKML_0.7-1.tar.gz">RKML_0.7-1.tar.gz</a></p>
+<p align="right">02 Aug 2011</p>
+<h1>RKML</h1>
+
+<p>
+ This is an initial implementation of a package that provides R
+users with  high-level facilities to generate <a href="">KML</a>, the Keyhole
+ Markup Language for display in, e.g., Google Earth.
+By high-level, we mean that the R user does not have to (but can)
+create the XML directly herself. Instead, there are high-level
+functions which take care of  these lower-level details.
+</p>
+
+<p> The package is intended to provide the basics and illustrate how
+others can build on this framework to add more functionality and allow
+other users to leverage more of the KML facilities.  As such, the
+package is far from a complete interface to KML, but more a
+proof-of-concept and an encouragement for statisticians to explore
+this rich form of visualization. We will add to the package as time
+permits and we need to for our own use.  We strongly encourage others
+to build on this, contribute code back or take over the package if
+they are intending to do much work in this area. Please chat with us
+via email to let us know about your plans so we can help and
+coordinate with others.  </p>
+
+<p>
+The main elements the package provides are
+the high-level <code>kml()</code> function,
+and the slightly lower-level/more-specific
+functions <code>kmlPoints()</code> and <code>kmlTime()</code>.
+<code>kmlPoints()</code> displays points on the earth.
+<code>kmlTime()</code> displays points but connects them with
+lines and puts a time stamp on each.
+</p>
+<p>
+These functions need to know the variables that correspond
+to longitude, latitude and time.  One can change the names of
+the variables in the data set, or more conveniently and richly use
+a formula notation. The formula is something like
+<pre>
+  ~ X + Y @ timeVariable
+</pre>
+This is not comprehensively implemented yet in terms of allowing
+transformations of the variables within the formula, but
+we will do this in the future. This notation will also support
+an expression on the right hand side and conditioning and
+this can be used for various interesting effects.
+</p>
+<p>
+There are more nuts-and-bolt functions for creating specific KML elements.
+</p>
+
+<h2>Examples</h2>
+
+<dl>
+
+  <dt>
+  <li> <a href="JSM2011">Four new annotated examples presented at the JSM 2011</a>
+  <dd>  A collection of examples based around Global and Regional Circulation
+        (Climate) Model data.
+       These illustrate polygons as placemarks, animation over time
+  with images and  polygons, synchronized animation in a pair of
+  embedded Google Earth plugins in a Web page, and a slider changing
+  the color of polygons in GE.
+  
+  <dt>
+  <li> <a href="Examples/elephantSeal.kml">Elephant Seal travels</a>
+  <dd> Deb Nolan's visualization of the travels of an elephant seal.
+       Data from David Brillinger and Brent Steward
+
+  <dt>
+  <li> <a href="Examples/harpSeal.kml">Norwegian Harp Seal</a>
+  <dd> Data from the <a  href="http://cran.r-project.org/web/packages/argosfilter">argosfilter</a>
+       package.
+      
+
+  <dt>
+  <li> <a href="Examples/seaos.kml">Seaos seal paths</a>
+      
+  <dd> Yet more seals! This is from the <a href="http://biology.st-andrews.ac.uk/seaos/results_oceano.htm">Seaos</a> project
+       at St. Andrews. This uses the seals to sample the ocean
+       characteristic. 
+      
+  <dt>
+  <li> <a href="Examples/CityTemperatures.kmz">Average temperatures in 100 US cities</a> in January, April, July
+      and October.      
+  <dd> This illustrates drawing time series created by R on Google
+       Earth at specific locations and also allowing the user to control
+       time.
+        The colors show the temperature, the flatness or peakedness
+       illustrate the variability. Clicking on a city also shows
+        the data for the city as a table and a larger version of the
+  plot.
+       <p>
+       There are many ways this could be improved. Try some!
+       <p>
+       See <a  href="http://www.omegahat.org/GoogleEarth/CityTemperatures/">here
+  for more details</a>
+       </p>
+
+  <dt>
+  <li> <a href="Examples/cities.kml">US Cities</a>
+  <dd> A view of ~ 1200 US cities merely displayed at their locations
+       on Google Earth with a minimal description provided giving the city
+       name and state.
+</dl>
+</ul>
+
+The code to generate these are in the package in the tests/ directory.
+This is the best place to look for working examples of different
+features. The examples in the Rd files may not be as comprehensive
+until I move the code from the tests to the Rd files.
+
+<h2>Changes</h2>
+<a href="Changes">Changes to the package</a>
+
+
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Tue Aug  2 08:03:51 PDT 2011
+<!-- hhmts end -->
+</body> </html>

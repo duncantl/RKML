@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<kml>
+  <Document>
+    <name>Testing KMZ generation</name>
+    <description><![CDATA[Bob]]></description>
+    <LookAt>
+      <latitude>38.5</latitude>
+      <longitude>-96</longitude>
+      <altitude>4e+06</altitude>
+    </LookAt>
+    <Style id="me">
+      <IconStyle>
+        <scale>0.35</scale>
+        <color>#FFFF0000</color>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+        <color>#FFFFFF00</color>
+      </LabelStyle>
+    </Style>
+    <Folder>
+      <name>Albany</name>
+      <Placemark>
+        <name>22.2 January</name>
+        <Point>
+          <coordinates>-73.8, 42.75</coordinates>
+        </Point>
+        <TimeStamp>
+          <when>1997-01</when>
+        </TimeStamp>
+        <description><![CDATA[ A <img src='CityTemperatures/Albany__N.Y..png'/>]]></description>
+      </Placemark>
+      <GroundOverlay>
+        <Icon>
+          <href>foo.png</href>
+        </Icon>
+        <LatLonBox><north>44.25</north><south>41.25</south><east>-72.3</east><west>-75.3</west></LatLonBox>
+      </GroundOverlay>
+    </Folder>
+    <Folder>
+      <name>San Francisco</name>
+      <Placemark>
+        <name>49.4 January</name>
+        <Point>
+          <coordinates>-122.68, 37.75</coordinates>
+        </Point>
+        <TimeStamp>
+          <when>1997-01</when>
+        </TimeStamp>
+        <description><![CDATA[San Francisco <img src='/Users/duncan/Books/XMLTechnologies/Rpackages/RKML/tests/foo.png'/>]]></description>
+      </Placemark>
+      <GroundOverlay>
+        <Icon>
+          <href>/Users/duncan/Books/XMLTechnologies/Rpackages/RKML/tests/foo.png</href>
+        </Icon>
+        <LatLonBox>
+          <north>39.25</north><south>36.25</south><east>-121.18</east><west>-124.18</west>
+	</LatLonBox>
+      </GroundOverlay>
+    </Folder>
+  </Document>
+</kml>

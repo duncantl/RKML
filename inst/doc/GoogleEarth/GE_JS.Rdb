@@ -1,0 +1,759 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+        xmlns:ecma="http://www.ecma-international.org/publications/standards/Ecma-262.htm"
+        xmlns:js="http://www.ecma-international.org/publications/standards/Ecma-262.htm"
+        xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title>Google Earth,  JavaScript, HTML, CSS, SVG, ...</title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title>Getting Google Earth into a Web page</title>
+
+<para>
+This is a brief introduction to putting Google Earth in a Web
+page. We'll describe the basic mechanism and 
+then try to build more interesting and complex pages.
+Along the way we will discuss 
+
+<ol>
+<li>HTML, </li>
+<li>CSS</li>
+<li>JavaScript in HTML,</li>
+<li> the computational model for JavaScript</li>
+<li>Google Earth API</li>
+<li>event-driven or asynchronous programming</li>
+</ol>
+
+We cover the introduction to KML and the facilities in
+R to create KML in a separate document.
+This focuses on HTML, JavaScript and the GE API.
+</para>
+<para>
+There is a wealth of widgets that we can include in an HTML page.
+See, for example, <ulink url="">the Yahoo UI</ulink>.
+</para>
+
+<para>
+In what follows, R is no longer running.  Eventually, we might mention
+how we can have R embedded in Firefox and so can have JavaScript
+access both R and Google Earth.
+</para>
+</section>
+
+
+<section>
+<title>Getting Started</title>
+<para>
+The first thing is to create an HTML document
+and insert a Google Earth panel into it.
+Basically, we create an HTML document.
+We have an HTML node at the root and within
+this there are 2 parts - a head and a body.
+The head is where we put
+<ol>
+<li>
+meta-information such as the title (to display in the browser's frame)
+and other details such as the author, keywords, etc.
+</li>
+<li>
+ JavaScript code, typically variable and function definitions.
+</li>
+<li>
+Cascading Style Sheet (CSS) content to control
+the appearance and layout of elements
+</li>
+</ol>
+
+The <xml:tag>body</xml:tag> is where we put the content that is display.
+</para>
+
+<para>
+To get Google Earth to display, we add JavaScript code to the
+<xml:tag>head</xml:tag>. We put the code inside <xml:tag>script</xml:tag>
+nodes.  Often we put the code  in comments also to ensure it doesn't
+mess up the HTML content, i.e. with &lt; and &gt; in the JavaScript code
+being confused for HTML markup.
+
+<programlisting><![CDATA[
+<script type="text/javascript"><!--
+  /* JavaScript code */
+ var x = 1;
+--></script>
+]]></programlisting>
+
+</para>
+<para>
+Often, I like to put the JavaScript code in a separate file and have
+the browser read that.
+
+<programlisting><![CDATA[
+  <script rel="text/javascript" src="geInit.js"></script>
+]]></programlisting>
+
+</para>
+
+
+<note>
+<para>
+When things don't (appear to )  work, make certain to use the 
+Error Console within your browser, e.g.
+Tools-&gt;Error Console in Firefox.
+</para>
+</note>
+
+<para>
+<ol>
+<li>JavaScript expressions end with ; </li>
+<li>we have to declare variables with <js:expr>var varName;</js:expr></li>
+<li>we invoke functions as <js:expr>foo(arg1, arg2, ..., argn)</js:expr> as in R,
+ but there are no named arguments.</li>
+<li>arrays are created as <js:expr>var a = [1, 2, 6, 8];</js:expr></li>
+<li>we create objects with  <js:expr>new ClassName(arg1, arg2, ...)</js:expr></li>
+<li>we invoke methods on objects with <js:expr>obj.methodName(arg1, arg2, ...)</js:expr></li>
+<li>we define functions as <js:expr>function funcName(param1, param2, ---, paramN) { body ....}</js:expr></li>
+</ol>
+</para>
+
+
+<para>
+We also include a CSS file which controls the appearance of the different elements.
+Note how the body is laid out with color, margins and font.
+The text of the <xml:tag>H1</xml:tag> elements (the top-level section headers) are colored blue.
+</para>
+
+
+<para>
+To coordinate where the GE display is located in the display,
+we put a <xml:tag>div</xml:tag> element with an <xml:attr>id</xml:attr>
+attribute corresponding to the one used in the JavaScript code that loads
+GE, i.e. in the call to <js:expr>google.earth.createInstance()</js:expr>.
+</para>
+<para>
+We specify a class for the div which will control its appearance via the CSS
+rules. However, we also specify the style explicitly as an attribute, so
+that one wins out over the CSS specification.
+</para>
+
+
+<para>
+Note that we put regular text into our document before
+the <xml:tag>div</xml:tag> element.
+We have a section title in a <xml:tag>H1</xml:tag>.
+There are six such sections, i.e. <xml:tag>H1</xml:tag>, <xml:tag>H2</xml:tag>, ... <xml:tag>H6</xml:tag>.
+Paragraphs are marked via <xml:tag>p</xml:tag>. 
+Links to URLs or internal anchors are marked up with 
+<xml:tag>a</xml:tag>, e.g. 
+<xml:expr><![CDATA[<a href="http://www.targetURL.org/path/to/doc"]]></xml:expr>.
+</para>
+
+
+<para>
+So our HTML document looks like
+
+<programlisting>
+<xi:include href="simple.html" parse="text"/>
+</programlisting>
+
+
+</para>
+<para>
+Our JavaScript file looks like
+
+<programlisting>
+<xi:include href="geInit.js" parse="text"/>
+</programlisting>
+</para>
+<para>
+And our CSS code is 
+<programlisting>
+<xi:include href="basic.css" parse="text"/>
+</programlisting>
+</para>
+
+
+<para>
+At this point, we are good to go. Load the <ulink url="simple.html"/> file into your
+browser.  After a few moments, you will hopefully see a Google Earth
+display within the document.  If not, check the error console. (Get
+used to this!)
+</para>
+<para>
+The JavaScript code is in <ulink url="geInit.js"/>
+and the CSS code in <ulink url="basic.css"/>
+</para>
+
+
+<para>
+Now the problem is that we have not loaded our KML/KMZ file.
+To do this, we have to call google.earth.fetchKML.
+We do this after the plugin has been initialized,
+i.e. in the initCallback we passed to createInstance.
+In this callback, we add the command
+
+<programlisting><![CDATA[
+  google.earth.fetchKml(ge, 'http://www.omegahat.org/RKMLDevice/boxplots.kmz', fetchCallback);
+]]></programlisting>
+
+We define our <js:func>fetchCallback</js:func> as 
+<programlisting><![CDATA[
+function fetchCallback(obj) {
+    ge.getFeatures().appendChild(obj);
+    alert("Should be visible now " + obj);
+}
+]]></programlisting>
+The call to alert pops up a window in the browser and displays the message.
+The + in <js:expr>"Should be visible now " + obj</js:expr> concatenates
+the strings, coercing obj to a string. We can use multiple +'s in a row, 
+e.g. 
+<js:expr>"A number " + 1 + " and another value " + object</js:expr>.
+
+</para>
+
+
+<para>
+Now one thing we will quickly notice is that there are no controls
+displayed on our Google Earth display.
+We can call a method of the GEPlugin object <js:var>ge</js:var>
+
+
+<programlisting><![CDATA[
+ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
+]]></programlisting>
+There are various different settings for how the controls appear.
+This is specified by the sole argument.
+The options are SHOW, HIDE and AUTO
+prefixed by ge.VISIBILITY_
+
+</para>
+
+
+<para>
+You can take a look at this with <ulink url="simpleFetchWithControls.html"/>
+The JavaScript code is in <ulink url="geInitFetchWithControls.js"/>.
+</para>
+
+
+<para>
+How do we find this stuff out?  From the main reference page <ulink
+url="http://code.google.com/apis/earth/documentation/reference/index.html"/>,
+click on the class of interest, e.g. GEPlugin.  Within this, there is
+a list of methods.  Each has a return type and you can click on that.
+For example, clicking on GEPlugin and then <ulink
+url="http://code.google.com/apis/earth/documentation/reference/interface_g_e_navigation_control.html">GENavigationControl</ulink>,
+we have information about its methods.
+</para>
+<para>
+There are many things we can do with the GEPlugin instance.
+We can load numerous KML/KMZ files.
+We can control where we are viewing.
+We can create new content within JavaScript, either with KML content 
+as a string, or by calling methods to create new elements,
+e.g. Placemark, ...
+</para>
+
+
+</section>
+<section>
+<title>JavaScript</title>
+
+
+<para>
+Let's take this a little further than just showing the Google Earth
+display within our Web page. If that was all we were doing, we'd
+almost be as well off using the regular Google Earth application. (Of
+course, we have put HTML text around the Google Earth display to add
+context, etc.)  But let's start by adding some user interface (UI)
+controls to the HTML page. We might add a series of radio buttons that
+allow the viewer to control which KML/KMZ file to view and to hide the
+others.  We might also use a pull-down menu or use check-boxes which
+are not exclusive like radio buttons.  So now we need to know about
+HTML forms.
+</para>
+<para>
+The simplest HTML form element is a button.
+We can create this with 
+
+<programlisting><![CDATA[
+<input type="button" value="Show boxplots"/>
+]]></programlisting>
+
+in our HTML document.  The only thing we need to do is specify what
+happens when the viewer clicks the button.  We can do this with an
+HTML form or a JavaScript command.  In this version of our HTML file,
+we'll in-line the JavaScript code that creates the Google Earth
+instance and have it add the controls.  But in addition to the three
+different functions (init, initCallback and failureCallback),
+we'll define a function that we can use to respond to the
+click of the button to fetch the KMZ file as we did before.
+We still have the fetchCallback function so all we need to 
+do when responding to the viewer clicking the button is
+evaluate the command
+
+<programlisting><![CDATA[
+  google.earth.fetchKml(ge, 'http://www.omegahat.org/RKMLDevice/boxplots.kmz', fetchCallback);
+]]></programlisting>
+So we can specify this as the command for the onclick attribute of our <xml:tag>button</xml:tag>
+element.
+
+
+<programlisting><![CDATA[
+<input type="button" value="Show boxplots"
+   onclick="google.earth.fetchKml(ge, 'http://www.omegahat.org/RKMLDevice/boxplots.kmz', fetchCallback);"/>
+]]></programlisting>
+
+However, we can do better. We can automate the rotation of the globe and zooming in to show the region of interest
+more clearly. 
+The JavaScript to do this is something like
+<programlisting><![CDATA[
+  var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+  lookAt.setLatitude(37);
+  lookAt.setLongitude(-122);
+  ge.getView().setAbstractView(lookAt);
+]]></programlisting>
+We could add these commands to the <xml:attr>onclick</xml:attr>
+attribute by separating the commands with ';'.
+However, it is better to define a function to set the view and
+then call this from the <xml:attr>onclick</xml:attr> attribute.
+So we can define a JavaScript function <js:func>setView</js:func>
+as
+<programlisting><![CDATA[
+function setView(long, lat) {
+  var lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+  lookAt.setLongitude(long);
+  lookAt.setLatitude(lat);
+  lookAt.setAltitude(100); /* We also set the altitude. */
+  ge.getView().setAbstractView(lookAt);
+}
+]]></programlisting>
+Then we can call it in our <xml:attr>onclick</xml:attr> attribute as 
+<programlisting><![CDATA[
+<input type="button" value="Show boxplots"
+   onclick="google.earth.fetchKml(ge, 'http://www.omegahat.org/RKMLDevice/boxplots.kmz', fetchCallback); setView(-122, 37)"/>
+]]></programlisting>
+<note>
+<para>This is not working w.r.t. altitude</para>
+</note>
+</para>
+
+
+<para>
+You can see this in <ulink url="geButtonView.html"/>.
+The JavaScript code is in-lined in that document.
+</para>
+
+
+
+<para>
+If we wanted to have check boxes, we would add something like the following 
+to the HTML
+
+<programlisting><![CDATA[
+<input type="checkbox" onchange="fetchOrToggle('http://www.omegahat.org/RKML/Examples/CityTemperatures.kmz')">
+<input type="checkbox" onchange="fetchOrToggle('http://www.omegahat.org/RKML/Examples/seal.kml')">
+]]></programlisting>
+
+Now we need to define a JavaScript function <js:func>fetchOrToggle</js:func>.
+This basically looks at its argument, the name of the KML file to load, and
+sees whether it that file has already been loaded and is currently visible. 
+If it is not, it fetches and displays it; if it is, it hides it.
+To do this, we need to keep a "hash" table or associative array 
+containing the fetched object and indexed by the name of the file.
+This is used to store the object. We also need to know if the 
+is currently displayed or not.
+This will allow us to toggle the display, while holding on to the object.
+So we use 3 "global" variables. (These are only visible within this
+HTML document.)
+Note the {} to initialize them. This makes an associative array,
+essentially the same as a named list in R.
+The <js:func>fetchOrToggle</js:func> function is called with the name of the KML file to load.
+If it is not already in the table, we download it
+as before. The callback function specified in the 
+fetchKml call needs to both show the KML object
+and also put the resulting object into the tables
+kmlObjects and kmlShown.
+<js:code>
+  var kmlObjects = {};
+  var kmlShown = {};
+  var pendingURL;
+
+  function fetchOrToggle(url) {
+     var tmp = kmlObjects[url];
+     if(tmp == null) {
+          // fetch it.
+        pendingURL = url;
+        google.earth.fetchKml(ge, url, fetchCallback);
+    } else {
+        if(kmlShown[url])
+           ge.getFeatures().removeChild(tmp);
+        else
+           ge.getFeatures().appendChild(tmp);
+          // change whether it was shown or not in the table.
+        kmlShown[url] = !kmlShown[url];
+    }
+ }
+
+  function fetchCallback(obj) {
+     var url = pendingURL;
+     pendingURL = null;
+     if(obj != null) {
+       ge.getFeatures().appendChild(obj);
+       kmlObjects[url] = obj;
+       kmlShown[url] = true;
+     } else
+       alert("Failed to load " + url);
+  }
+</js:code>
+
+</para>
+
+
+<para>
+This is done in the file <ulink url="geCheckboxView.html"/>.
+Again the JavaScript code is in-lined in the <xml:tag>head</xml:tag> of that document.
+</para>
+
+
+
+</section>
+
+<section>
+<title>Connecting to an R plot</title>
+
+<para>
+Now, the next and final step in our example is to
+create a plot in R and connect that with the Google Earth display.
+We want to have an R plot beside the Google Earth display
+and to allow interactions on the R plot to change the view
+in the GE display.
+The R plot will be displayed in the browser.
+We naturally think of using a PNG or JPEG file.
+But how do we get interactivity on this?
+We can use an HTML image map. 
+But a better way is to use an SVG plot.
+We can generate this in R.
+If 
+<r:code>
+capabilities()["cairo"]
+</r:code>
+returns <r:true/>,
+the <r:func>svg</r:func> function  will be available.
+Alternatively, we can use the Cairo package.
+</para>
+<para>
+SVG is an XML dialect. 
+The SVG plot from R will have instructions to draw each of the graphical elements in our plot.
+We can work with this XML document and  annotate the elements to specify 
+JavaScript event handler code. 
+</para>
+
+<para>
+We'll continue with the temperature data.
+
+Let's start by loading the temperature data and
+arranging it into a data frame with a variable giving
+temperature for each of the 4 months:
+<r:code>
+data(temperature, package = "RKML")
+z = with(temperature, unstack(temperature,  temp ~ month))
+</r:code>
+
+Now let's create a time series for each city.
+We can do this as  a specific case of a parallel coordinates plot
+or by using <r:func>matplot</r:func>:
+<r:plot><![CDATA[
+matplot(t(z), type = "l", axes = FALSE, ylab = "Temperature",
+          main = "Temperatures for 100 cities for different seasons")
+box()
+axis(2)
+axis(1, at = 1:4, c("Jan", "Apr", "Jul", "Oct"))
+]]></r:plot>
+
+We might also consider drawing  box plots for each month 
+and then superimposing the parallel coordinate
+points
+
+<r:plot eval="false"><![CDATA[
+boxplot(temp ~ month, temperature)
+matlines(t(z))
+]]></r:plot>
+
+</para>
+<para>
+We'll use the simpler <r:func>matplot</r:func>
+Now we will create the SVG plot
+<r:code>
+library(SVGAnnotation)
+doc = svgPlot({
+     matplot(t(z), type = "l", axes = FALSE, ylab = "Temperature",
+           main = "Temperatures for 100 cities for different seasons")
+     box()
+     axis(2)
+     axis(1, at = 1:4, c("Jan", "Apr", "Jul", "Oct"))
+     matplot(t(z), type = "l")
+  })
+</r:code>
+
+
+Next we get the SVG objects that represent the time series lines in the plot:
+<r:code>
+series = unlist(getPlotPoints(doc))
+</r:code>
+
+Now, what we want to do with these XML (SVG) nodes is to add an
+<xml:attr>onmouseover</xml:attr> attribute to each.  The code in this
+attribute is responsible for moving the view in the Google Earth
+display to the corresponding city.  We need to get the longitude and
+latitude for the corresponding city, and then we can call our setView
+JavaScript function.  
+
+
+<r:code>
+cmds = sprintf("parent.setView(%f, %f)",
+                - temperature$longitude[1:100], 
+                temperature$latitude[1:100])
+invisible(
+   mapply(function(node, city, cmd) {
+          #addToolTips(node, city)
+          xmlAttrs(node) = c(onmouseover = cmd)
+   }, series, temperature$city[1:100], cmds))
+
+</r:code>
+
+We add a CSS file to the SVG file to control the appearance
+of rectangles used for the tooltips.
+Then we save the SVG document to a file.
+<r:code>
+addCSS(doc)
+saveXML(doc, "cityTemps.svg")
+</r:code>
+</para>
+
+<para>
+Note that we could use a more general function as the
+<xml:attr>onmouseover</xml:attr> attribute rather than in-lining
+a JavaScript expression (<js:expr>"parent.setView(long, lat)"</js:expr>).
+By using a function, e.g. showCity, we have the opportunity
+to change and extend what that does without having to change all of the 
+<xml:attr>onmouseover</xml:attr> events.
+For example, we might want to change the width of the line we are mousing
+over, as well as moving the view of the globe.
+We also would need to add an <xml:attr>onmouseout</xml:attr> attribute.
+If find it convenient to use the same function for
+<xml:attr>onmouseover</xml:attr> and <xml:attr>onmouseout</xml:attr>
+but with an extra argument that is either true or false
+indicating which action is intended,
+e.g.
+<xml:code><![CDATA[
+<path .... onmouseover="toggleCity(long, lat, true)"  onmouseout="toggleCity(long, lat, false)"/>
+]]></xml:code>
+</para>
+
+
+<para>
+By the way, we do have choices as to where we do some of these computations. We can
+do it in R and insert the JavaScript code as the attribute for each node.
+Alternatively, we can defer getting the longitude, latitude pair to
+JavaScript. We can even add the attribute when the SVG plot is rendered
+using JavaScript.
+However, there is no point in doing the latter, but we could. We
+can write R data to be available in JavaScript using the JSON format
+and the RJSONIO (or rjson) package.
+</para>
+
+
+<para>
+Now we assemble the HTML document that displays
+the GE plugin and the SVG plot.
+We have the same basic structure.
+The only things we add are
+<ol>
+<li> the code to fetch and load the KMZ file for the temperatures
+</li>
+<li>display the SVG figure in the body of the HTML document</li>
+</ol>
+
+We use the following to display the SVG
+
+<programlisting><![CDATA[
+<object data="cityTemps.svg" 
+        type="image/svg+xml" width="960" height="800"/>    
+]]></programlisting>
+Here we specify the name of the file, its width and height
+and important the type of content that is being displayed.
+
+</para>
+<para>
+How we arrange the GE display and the SVG plot is another issue.  We
+may want to put them side by side or one on top of the other.  We can
+do the latter with separate paragraphs.  Side by side can be done with
+tables, but we are much better off using the more general, flexible
+but somewhat more complicated layout mechanism available via styles
+and CSS.
+
+</para>
+
+
+<para>
+This is done in the file <ulink url="geSVG.html"/>
+with the JavaScript code in <ulink url="geInitSVG.js"/>
+</para>
+
+
+
+
+
+<para>
+<figure>
+<title>Screen shot of the Google Earth &amp; SVG interaction</title>
+<imagedata fileref="GESVG.png"/>
+</figure>
+</para>
+
+</section>
+
+<section>
+<title>Loading/Fetching from local files</title>
+
+<para>
+As we are developing the KML part of the display, it is best to view
+it in the stand-alone Google Earth application, and not via the GE
+plugin for your browser.  This allows you to check the KML is correct,
+and generally reduces the level of complexity by a lot.  The chain of
+actions is simpler, so less things will go wrong before you see the
+KML, and you can focus on getting the KML content right and not having
+interactions with different pieces of the tool chain.  Also, Google
+Earth "the application" gives you nice controls on the left panel that
+you don't get in the browser.
+</para>
+
+<para>
+When you have the KML right, you can try to load it into your browser
+via the plugin. Things won't work. The reason is that 
+when you are running Google Earth in your browser,
+there are security issues that arise. The JavaScript code cannot start poking
+around your local file system, e.g. reading your bank account info.
+So that is why you cannot work with a local file.
+There are two different pieces here - local and file.
+</para>
+
+<para>
+So when you want to display the local KML file via the Web browser, you have to
+do something slightly different.
+There are some tricks to this (e.g. ActiveX controls on Windows), 
+but the simplest for people using a Mac is to run your own web server.
+You can do this on a Windows or a Linux machine also by running a web server.
+This is a little less direct, but quite feasible.
+</para>
+<para>
+The steps on a Mac to run a Web server and serve a file via that are as follows:
+<ol>
+<li>
+ In your System Preferences, go to Sharing and within that panel,
+activate the "Web Sharing".
+ Now you are running a local web server. 
+ </li>
+<li> You the create a directory named
+<programlisting><![CDATA[
+       Sites
+]]></programlisting>
+in your home directory and put files there.
+They are now available as
+
+<programlisting><![CDATA[
+    http://localhost/~dajohnston/myGE.kmz
+]]></programlisting>
+or whatever the appropriate names are.
+</li>
+</ol>
+</para>
+
+<para>
+Another approach is to focus on the word "file" in the "local file" problem we are discussing.
+We can remove the need for a file by taking the contents of the KML file and making them into
+a JavaScript string.  Then, you can use the Google Earth plugin instance's methods
+<js:func>parseKml</js:func> and the <js:expr>getFeatures().appendChild()</js:expr> (as before) to load that.
+
+<programlisting><![CDATA[
+     var tmp = ge.parseKml(myKMLContent);
+     ge.getFeatures().appendChild(tmp);
+]]></programlisting>
+
+The variable <js:var>myKMLContent</js:var> is a JavaScript string that I define in a separate file
+that is included into the HTML document via a <xml:expr><![CDATA[<script src="myKMLContent.js"></script>]]></xml:expr>
+node. (It could be inlined directly in the <xml:tag>head</xml:tag> of the HTML document.)
+It looks something like
+
+<programlisting><![CDATA[
+var myKMLContent = "<?xml version=\"1.0\"?>\n<Document>\n<name>elephantSeal</name>\n<LookAt>\n<longitude>-135.569863013699</longitude>\n<latitude>42.0849315068493</latitude>\n<altitude>4100000</altitude>\n<tilt>0</tilt>\n<heading>0</heading>\n</LookAt>\n<Style id=\"ball_green\">\n<IconStyle>\n<scale>0.5</scale>\n<Icon>/Users/duncan/Rpackages/RKML/Icons/greendot.png</Icon>\n</IconStyle>\n<BalloonStyle>$description</BalloonStyle>\n</Style>\n<Style id=\"ball_red\">\n<IconStyle>\n<scale>0.5</scale>\n<Icon>/Users/duncan/Rpackages/RKML/Icons/reddot.png</Icon>\n</IconStyle>\n<BalloonStyle>$description</BalloonStyle>\n</Style>\n<Style id=\"line_green\">\n<LineStyle>\n<color>ff8adfb2</color>\n<width>4</width>\n</LineStyle>\n</Style>\n<Style id=\"line_red\">\n<LineStyle>\n<color>ff999afb</color>\n<width>2</width>\n</LineStyle>\n</Style>\n<Folder>\n<name>elephantSeal</name>\n<Placemark>\n<name>01-01</name>\n<description>1995-01-01T00:00:00</description>\n<TimeSpan>\n<begin>1995-01-01T00:00:00</begin>\n<end>1995-01-01T00:00:00</end>\n</TimeSpan>\n<styleUrl>#ball_green</styleUrl>\n<Point>\n<coordinates>-120,34,0</coordinates>\n</Point>\n</Placemark>.......";
+]]></programlisting>
+Note that it is essential that the new lines are not actual line breaks but \n.
+The browser will give you an error about an unterminated string literal if the code reads  like
+
+<programlisting><![CDATA[
+var myKMLContent = "<?xml version\"1.0\"?>
+<Document>
+<name>elephantSeal</name>
+ ...
+";
+]]></programlisting>
+Note also that you have to escape the " within the text so that JavaScript won't read
+them as the end of the " introducing the actual content.
+</para>
+
+<para>
+So how do we create that file?
+Let's assume we have an R variable <r:var>myKMLDocument</r:var>
+which is a KML document, e.g. created with a call to <r:func>createKMLDoc</r:func>
+or <r:func>kmlTime</r:func> or <r:func>kmlPoints</r:func>.
+We turn it into a string with newlines represented as \n via 
+the <r:arg>indent</r:arg> parameter of <r:func>saveXML</r:func>:
+<r:code>
+  txt =  saveXML(myKMLDocument, indent = FALSE)
+</r:code>
+We replace " with \" and then write the KML and the JavaScript
+
+
+<r:code>
+txt = gsub('[^\\]"', '\\\\"', txt)
+</r:code>
+
+Finally, we write the JavaScript code to a file:
+<r:code>
+cat("var myKMLContent = ", txt, file = "myContent.js")
+</r:code>
+
+</para>
+<para>
+A version of this is in <ulink url="inlineKML.html"/>
+and the JavaScript file is <ulink url="myKMLContent.js"/>
+
+</para>
+<para>
+
+The Web server approach is nice and easy and emulates the more common setup.
+But inlining is a nice way to avoid the reliance on a web site.
+
+</para>
+</section>
+
+<section>
+<title>References</title>
+
+<para>
+See <ulink url="http://code.google.com/apis/earth/documentation/reference/index.html"/>
+for reference material on the Google Earth API for JavaScript.
+</para>
+
+
+</section>
+
+</article>

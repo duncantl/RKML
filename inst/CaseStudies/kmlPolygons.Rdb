@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+The purpose of this example is to illustrate how we can make
+an image map in Google Earth. Specifically, we will draw
+polygons for the boundaries of the counties in the Bay Area.
+When the viewer clicks anywhere within a county, we display
+a plot of the median house prices for each week.
+We reuse some of the plots created in the Image Maps examples.
+(See stat141 class notes.)
+</para>
+<para>
+We will use the <r:pkg>maps</r:pkg> package to get the boundaries
+for the counties. We would be better off using more accurate boundaries.
+<r:code>
+library(maps)
+load("~/Data/housing.Rda")
+xlim = range(housing$long, na.rm = TRUE)
+ylim = range(housing$lat, na.rm = TRUE)
+m = map('county', xlim = xlim, ylim = ylim,
+         fill = TRUE, col = "transparent")
+</r:code>
+
+</para>
+<para>
+Now we create our KML document.
+We create the basic stub of a document and then add a Folder node
+to house our polygons.
+<r:code>
+library(RKML)
+kdoc = createKMLDoc("County House Prices", "Sales price data for counties in the SF Bay Area", 
+                     list(longitude = mean(xlim), latitude = mean(ylim),
+                           altitude = 250000))
+doc = xmlRoot(kdoc)[["Document"]]
+folder = newXMLNode("Folder", newXMLNode("name", "polygons"), parent = doc)
+</r:code>
+
+We split the polygon information 
+so that we can get the polygon for each county.
+<r:code>
+i = cumsum(is.na(m$x))
+w = !is.na(m$x)
+tmp = data.frame(x = m$x[w], y = m$y[w], countyNum = i[w])
+i = i[w]
+</r:code>
+
+<ignore>
+<r:function><![CDATA[
+capitalize =
+function(x)
+{
+  sprintf("%s%s", toupper(substring(x, 1, 1)), substring(x, 2))
+}
+]]></r:function>
+</ignore>
+
+We change the names of the polygons and insert them into the
+data frame so we can identify the county corresponding to the boundary.
+We use this to display the corresponding plot.
+<r:code>
+tmp$countyName = gsub("^california,", "", m$names[tmp$countyNum + 1])
+</r:code>
+
+
+</para>
+<para>
+Next we create the Placemark nodes containing the polygons.
+We also add a <xml:tag>description</xml:tag> node to each
+displaying the name of the county and the plot.
+<r:code><![CDATA[
+by(tmp, i,
+    function(vals) {
+      node = kmlPolygon(vals[,1], vals[,2], parent = folder)
+      imgName = sprintf("../Images/%s.png", vals[1, "countyName"])
+      if(file.exists(imgName))
+        newXMLNode("description", 
+                   newXMLCDataNode( sprintf("<h1>%s<h1><img src='%s'/>", vals[1, "countyName"], imgName)),
+                 parent = node)
+      else
+         warning("no image ", imgName)
+    })
+]]></r:code>
+
+</para>
+
+<para>
+Finally, we can write the KML document to a file and then load it into Google Earth:
+<r:code>
+saveXML(kdoc, "polys.kml")
+</r:code>
+
+</para>
+
+</section>
+</article>

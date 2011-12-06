@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+This is an example where we read the catalog of earthquakes and
+display them in Google Earth.
+We want to also display plots that summarize collections of 
+events for a given region.
+</para>
+
+
+<para>
+<r:code>
+doc = xmlParse("merged_catalog.xml.gz")
+</r:code>
+
+We can check that all the nodes under the root are <xml:tag>event</xml:tag> elements:
+<r:code>
+table(names(xmlRoot(doc)))
+</r:code>
+We want the latitude and longitude,  magnitude, time, depth.
+All these variables are found as <xml:tag>param</xml:tag>
+elements within the <xml:tag>event</xml:tag> element
+identified by a <xml:attr>name</xml:attr> attribute
+and having the value in the <xml:attr>value</xml:attr> attribute.
+Let's write a function to convert an element into a named character vector.
+
+<r:function><![CDATA[
+processEvent =
+function(node)
+{
+  structure(xmlSApply(node, xmlGetAttr, "value"), 
+             names = xmlSApply(node, xmlGetAttr, "name"))
+}
+]]></r:function>
+
+
+<r:code>
+events = xmlApply(xmlRoot(doc), processEvent)
+</r:code>
+
+
+We can put this into a data frame if we know all possible names.
+
+<r:code>
+allNames = unique(unlist(sapply(events, names)))
+</r:code>
+We end up with  NULL in here.
+Which ones have a NULL
+
+<r:code>
+which(sapply(events, function(x) "NULL" %in% names(x)))
+</r:code>
+We take a look at the corresponding XML nodes
+
+<r:code>
+xmlRoot(doc)[[24]]
+</r:code>
+We see that we have a node which is not a <xml:tag>param</xml:tag>
+but rather a <xml:tag>duplicate</xml:tag>.
+So we should drop this.
+Let's see what other nodes are within a <xml:tag>event</xml:tag>
+that are not <xml:tag>param</xml:tag>.
+
+<r:code>
+o = getNodeSet(doc, "//event/*[local-name() != 'param']")
+sappply(o, xmlName)
+</r:code>
+
+We see these are all <xml:tag>duplicate</xml:tag>.
+So we should discard these in our <r:func>processEvent</r:func>
+function.
+
+
+<r:function><![CDATA[
+processEvent =
+function(node)
+{
+  params = xmlChildren(node)[names(node) == "param"]
+  structure(sapply(params, xmlGetAttr, "value"), 
+             names = sapply(params, xmlGetAttr, "name"))
+}
+]]></r:function>
+
+
+So we recalculate <r:var>vars</r:var>
+<r:code>
+events = xmlApply(xmlRoot(doc), processEvent)
+</r:code>
+
+<r:code>
+allNames = unique(unlist(sapply(events, names)))
+</r:code>
+</para>
+
+Not all events have all fields. We can verify this with
+
+<r:code>
+table(sapply(events, length))
+</r:code>
+
+So to create a data frame, we might use code like the following
+
+<r:code>
+quakes = as.data.frame(do.call("rbind", lapply(events, function(x) x[allNames])))
+names(quakes) = allNames
+</r:code>
+
+<para>
+
+Next we want to turn the date into something more meaningful
+than a collection of separate fields.
+So we can combine these fields into a string for each observation 
+and then convert the values to a POSIXt value.
+
+<r:code>
+tmp = with(quakes, 
+            paste(year, month, day, hour, minute, second, sep = "-"))
+</r:code>
+We'll remove the discard the portion of the seconds after the decimal place.
+
+<r:code>
+tmp = gsub("\\..*$", "", tmp)
+</r:code>
+And now we create the POSIXt value
+
+<r:code>
+quakes$timestamp = as.POSIXct(strptime(tmp, "%Y-%m-%d-%H-%M-%S"))
+</r:code>
+Check that there are no <r:na/> values:
+
+<r:code>
+any(is.na(quakes$timestamp))
+</r:code>
+
+</para>
+<para>
+We should change the magnitude, depth and latitude and longitude to numeric variables
+
+<r:code>
+quakes[c("latitude", "longitude", "depth", "magnitude")] = 
+      lapply(quakes[c("latitude", "longitude", "depth", "magnitude")], function(x) as.numeric(as.character(x)))
+</r:code>
+
+</para>
+
+<para>
+
+<r:code>
+library(RKML)
+xx = kmlTime(quakes, quakes$timestamp, groups = floor(quakes$magnitude))
+saveXML(xx, "earthquakes.kml")
+</r:code>
+</para>
+
+
+
+</section>
+</article>

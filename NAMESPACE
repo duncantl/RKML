@@ -1,0 +1,53 @@
+
+import(XML)
+#import(Rcompression) # for creating kmz/zip files.
+
+export(kmlTime, kmlPoints)
+
+export(makeKMZArchive)
+exportMethods(saveXML)
+
+export(kml)
+S3method(kml, formula)
+S3method(kml, KMLFormula)
+
+# export(kmlFormula) # For parsing an extended formula into our components.
+
+# The following are more helper functions that others might find
+# useful when creating their own content.
+
+export(createKMLDoc, addDataFolder, addFolder)
+export(addStyles, makeStyle, anchorStyles)
+export(createLookAt, addScreenOverlay, addGroundOverlay,
+       addPlacemark, addIcon, addTimeStamp, addDescription)
+
+S3method(addTimeStamp, default)
+S3method(addTimeStamp, POSIXct)
+S3method(addTimeStamp, POSIXlt)
+S3method(addTimeStamp, Date)
+
+export(HTMLTable)
+
+export(createUpdatingDoc)
+
+export(kmlFormula)
+export(kmlCircle, kmlSegments, kmlPolygon, kmlText)
+
+export(kmlLegend)
+
+import(graphics)
+exportMethods("text")
+export(groundOverlay)
+
+
+export(rgbToKMLColor)  # mainly for devel.
+
+
+export(makeBallIcon, makeRectIcon, makePchIcon)
+
+export(folderNames)
+exportMethods(folderNames)
+
+
+export(setAPIKey, copyPluginJSCode) # insertJS
+

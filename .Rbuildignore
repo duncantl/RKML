@@ -1,0 +1,15 @@
+tests/images.*
+tests/cityTemperatures.*
+airDelays.rda
+.*Rcheck.*
+.*/..Rcheck/.*
+.*autom4te.cache.*
+.*/config.log
+.*/config.status
+tests/.*km[zl]
+xxxxxxx[^/]+.km[zl]$
+.*JSM2011.*
+.*CaseStudies/.*.km[lz]
+
+
+

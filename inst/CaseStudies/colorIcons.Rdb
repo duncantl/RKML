@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+This example illustrates how we can color the placemark icons.
+We will use the housing data again.
+We put placemarks for some of the houses, specifically in the city of Mill Valley 
+We color them based on the house price.
+We create a categorical variable representing house price
+using <r:func>cut</r:func>.
+Then we create icons for these different levels.
+
+<r:code>
+load("~/Data/housing.Rda")
+mv = subset(housing, city == "Mill Valley")
+</r:code>
+We check that there are sufficiently many observations and
+range to make things somewhat interesting:
+<r:code>
+dim(mv)
+range(mv$price, na.rm = TRUE)
+</r:code>
+</para>
+<para>
+
+Let's create a categorical price variable:
+<r:code>
+mv$priceLevel = cut(mv$price, 7)
+</r:code>
+We look at the distribution of these
+<r:code>
+table(mv$priceLevel)
+</r:code>
+
+We might want to specify the breaks directly:
+
+<r:code>
+mv$priceLevel = cut(mv$price, c(0, 3e5, 6e5, 9e5, 1.2e6, 1.5e6, 2e6, max(mv$price, na.rm = TRUE)))
+</r:code>
+</para>
+<para>
+
+Now let's create icons for the 7 different levels.
+
+<r:code>
+library(RKML)
+icons = mapply(makeBall, heat.colors(7), sprintf("heat_%d.png", 1:7))
+</r:code>
+
+
+<r:code>
+styles = lapply(icons, function(x) list(IconStyle = list(scale = ".5", Icon = c(href = x))))
+names(styles) = gsub(".png", "", icons)
+</r:code>
+
+<r:code>
+doc = kmlPoints(.longitude = mv$long, .latitude = mv$lat, .names = rep("", nrow(mv)), # .names = as.character(mv$street),
+                folderName = "Mill Valley",
+                styles = styles,
+                col = names(styles)[mv$priceLevel])
+</r:code>
+Note that we turn off the names appearing on the display so that we can see the colors clearly.
+
+<r:code>
+saveXML(doc, "millValleyByColor.kml")
+</r:code>
+</para>
+</section>
+<section>
+<title>Glyphs</title>
+
+<para>
+We can also use color and glyphs to represent two additional variables.
+Let's look at the distribution of priceLevel and number of bedrooms:
+<r:code>
+with(mv, table(priceLevel, br))
+</r:code>
+
+We want a collection of icons that have color corresponding to 
+priceLevel and a glyph or plotting character corresponding to number of bedrooms.
+In R, we can specify these independently.
+In KML, we need to create these icons and the refer to them as styles.
+So let's create icons for all possible combinations of priceLevel and br.
+(Of course, we only need the ones for which there is at least one observation.)
+
+We want to use plotting characters which are solid, i.e. filled in.
+These are 15:20. We can also use 8 and 10. The others are a little to 
+sparse of color and so are not very visible with the terrain underneath them.
+<r:code>
+pairs = expand.grid(seq(along = levels(mv$priceLevel)), unique(mv$br))
+colors = heat.colors(length(levels(mv$priceLevel)))
+pch = c(8, 10, 15:20)
+icons = apply(pairs, 1, 
+               function(x) 
+                 makePchIcon( pch[ x[2] ], colors[ x[1] ], sprintf("icon_%d_%d.png", x[1], x[2])))
+</r:code>
+
+So now we turn these into a form to define styles for our document:
+
+<r:code>
+styles = lapply(icons, function(x) list(IconStyle = list(scale = ".5", Icon = c(href = x))))
+names(styles) = gsub(".png", "", icons)
+</r:code>
+
+And now we can use these
+
+<r:code>
+idx = sprintf("icon_%d_%d", as.integer(mv$priceLevel), as.integer(mv$br))
+doc = kmlPoints(.longitude = mv$long,
+                .latitude = mv$lat, 
+                .names = rep("", nrow(mv)),
+                folderName = "Mill Valley",
+                styles = styles,
+                col = names(styles[idx]))
+</r:code>
+
+
+<r:code>
+saveXML(doc, "millValleyBrPrice.kml")
+</r:code>
+
+
+Of course another approach is to put the houses with the same number of bedrooms
+in their own folder.
+</para>
+
+</section>
+</article>

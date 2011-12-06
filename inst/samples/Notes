@@ -1,0 +1,7 @@
+The page
+  http://code.google.com/apis/earth/documentation/placemarks.html
+
+tells us how to change the size of a placemark.  So we can use this
+when we click on a point in a scatterplot to make the corresponding
+placemark bigger.  We need to be able to map from the point to the
+placemark object in JavaScript.  We can do this with ids or indices.

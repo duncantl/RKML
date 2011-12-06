@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude"
+	xmlns:xml="http://www.w3.org/XML/1998/namespace">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+The idea here is to create a plot in R as an interactive SVG
+plot, and also an HTML document in which we display both
+the SVG plot and the corresponding points on an embedded Google
+Earth canvas.
+We are putting this example together with a focus on the mechanics,
+not the data analysis.
+
+</para>
+<para>
+We start by loading the data and  packages we will need
+<r:code>
+library(RKML)
+library(SVGAnnotation)
+data(quakes)
+</r:code>
+
+</para>
+<para>
+Next, we create the scatterplot of magnitude versus depth
+
+<r:code>
+plot = svgPlot(plot(magnitude ~ depth, quakes))
+</r:code>
+
+When the viewer clicks on a point in Google Earth, we will need to be able to get the SVG object corresponding to that point.
+So we put an id on each of the SVG nodes corresponding to a point in the plot:
+
+<r:code>
+pts = getPlotPoints(plot)
+invisible(mapply(function(node, id)
+                     xmlAttrs(node) = c(id = id),
+                  pts, sprintf("pt_%d", seq(along = pts))))
+</r:code>
+
+
+<r:code>
+convertCSSStylesToSVG(pts)
+</r:code>
+
+
+We then add some JavaScript code to provide a function to 
+toggle the appearance of a point
+<r:code>
+addECMAScripts(plot, "svgPoint.js")
+</r:code>
+
+
+<r:code>
+saveXML(plot, "depthMag.svg")
+</r:code>
+
+</para>
+
+<para>
+The next step is to create the KML document to display the points in Google Earth.
+
+<r:code>
+kdoc = kmlPoints(quakes)
+</r:code>
+Now we need to put an event handler on each of these <xml:tag>Placemark</xml:tag> elements.
+We can do this in JavaScript code when the Google Earth plugin is being initialized.
+We arrange to loop over all the placemark elements in the GE instance.
+
+For simplicity, we'll put an id on each of the <xml:tag>Placemark</xml:tag> elements we created.
+
+<r:code>
+pl = getNodeSet(kdoc, "//Placemark")
+invisible(mapply(function(node, id)
+                   xmlAttrs(node) = c(id = id),
+                 pl, sprintf("quake_%d", seq(along = pl))))
+</r:code>
+
+<r:code>
+saveXML(kdoc, "quakes.kml")
+</r:code>
+
+
+
+</para>
+
+
+</section>
+</article>

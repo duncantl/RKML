@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+
+<r:code>
+library(XML)
+dir = "~/Books/XMLTechnologies/XSL/examples/Earthquakes/"
+doc = xmlParse(sprintf("%s%s", dir, "2004_Earthquakes_ALL.kml"))
+</r:code>
+
+We get all the <xml:tag>Placemark</xml:tag> nodes under the <xml:tag>Folder</xml:tag> nodes.
+<r:code>
+pl = getNodeSet(doc, "//kml:Folder/kml:Placemark", "kml")
+</r:code>
+Now we extract the longitude and latitude, the magnitude, etc.
+
+</para>
+
+<para>
+Before we do this, let's just test one thing.
+Which is faster: getting the <xml:tag>Placemark</xml:tag> nodes
+once and then working on these to extract their children in R,
+or to use XPath many times to get each of the different elements in the document
+that we want, <xml:tag>coordinates</xml:tag>, <xml:tag>description</xml:tag>, <xml:tag>name</xml:tag>
+within in each <xml:tag>Placemark</xml:tag>.
+Let's time these
+<r:code eval="false">
+system.time({desc = sapply(pl, function(x) xmlValue(x[["description"]]))})
+<r:output><![CDATA[
+   user  system elapsed 
+ 18.411   0.972  35.986 
+]]></r:output>
+system.time({desc1 = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:description", xmlValue, namespaces = "kml")})
+<r:output><![CDATA[
+   user  system elapsed 
+  0.711   0.052   1.262 
+]]></r:output>
+all(desc1 == desc)
+</r:code>
+
+So it is much faster (in this context) to use XPath many times
+rather than using R to access the children by name.
+Accessing by index may be different.
+
+<r:code eval="false">
+system.time({desc = sapply(pl, function(x) xmlValue(x[[2]]))})
+<r:output><![CDATA[
+   user  system elapsed 
+ 10.201   0.697  17.039 
+]]></r:output>
+</r:code>
+
+</para>
+
+</section>
+
+<section id="oneFile">
+<title>Reading one File</title>
+
+<para>
+
+
+<r:code id="magnitude">
+nm = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:name", xmlValue, namespaces = "kml")
+#nm = sapply(pl, function(x) xmlValue(x[["name"]]))
+mags = gsub("^M (None|[0-9.]+) -.*", "\\1", nm)
+mags[mags == "None"] = "0"
+magnitude = as.numeric(mags)
+# Check the results
+sum(is.na(magnitude)) == 0
+table(floor(magnitude))
+</r:code>
+
+</para>
+<para>
+Now get the depth from the HTML content in the description.
+
+<r:code id="description">
+desc = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:description", xmlValue, namespaces = "kml")
+# desc = sapply(pl, function(x) xmlValue(x[["description"]]))
+getDepthStringFromDesc = 
+function(x) { 
+  hdoc = htmlParse(x, asText = TRUE)
+  xmlValue(getNodeSet(hdoc, "//tr[2]/td/font")[[1]])
+}
+str = sapply(desc, getDepthStringFromDesc)
+depth = as.numeric(gsub(" .*", "", str)) # strip names
+sum(is.na(depth))
+</r:code>
+</para>
+
+<para>
+Let's get the date
+<r:code id="dates">
+dates = unlist(getNodeSet(doc, "//kml:Folder/kml:Placemark/@id", "kml"))
+dates = as.POSIXct(strptime(dates, "%Y %b %d %H:%M:%S %Z"))
+</r:code>
+
+</para>
+<para>
+Now the longitude and latitude
+<r:code id="coordinates">
+coords = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:Point/kml:coordinates", xmlValue, namespaces = "kml")
+locations = t(sapply(strsplit(coords, ","), function(x) x[1:2]))
+</r:code>
+
+</para>
+<para>
+Now we assemble the data frame
+
+<r:code id="assemble">
+eq = data.frame(dates = dates, depth = depth, magnitude = magnitude)
+eq$longitude = as.numeric(locations[,1])
+eq$latitude = as.numeric(locations[,2])
+</r:code>
+
+</para>
+
+</section>
+
+<section id="readFunctionDefn">
+<title></title>
+
+<para>
+<r:function>
+readKMZEarthquakes =
+function(doc)
+{
+ if(is.character(doc)) {
+   if(length(grep("^http.*kmz$", doc))) {
+       doc = xmlParse(getKMZURL(doc), asText = TRUE)
+   } else
+       doc = xmlParse(doc)
+ }
+
+cat("parsed the XML file\n")
+ <r:frag ref="magnitude"/>
+ <r:frag ref="dates"/>
+ <r:frag ref="description"/>
+ <r:frag ref="coordinates"/>
+ <r:frag ref="assemble"/>
+ eq
+}
+</r:function>
+</para>
+<para>
+
+<r:function><![CDATA[
+getKMZURL =
+function(doc, readXML = TRUE)
+{
+  kmz = getURLContent('http://neic.usgs.gov/neis/epic/kml/2009_Earthquakes_ALL.kmz')
+  ar = zipArchive(kmz)
+  if(readXML)
+    invisible(xmlParse(ar[[1]], asText = TRUE))
+   else
+     ar
+}
+]]></r:function>
+
+</para>
+</section>
+
+
+<section>
+<title></title>
+
+<para>
+How do we get a list of the KMZ files?
+
+<r:code>
+library(RCurl)
+library(XML)
+u = "http://neic.usgs.gov/neis/epic/kml/"
+doc = htmlParse(u)
+refs = getNodeSet(doc, "//a/@href")
+urls = grep("_ALL.kmz", unlist(refs), value = TRUE)
+urls = paste(u, urls, sep = "")
+</r:code>
+
+</para>
+</section>
+
+</article>

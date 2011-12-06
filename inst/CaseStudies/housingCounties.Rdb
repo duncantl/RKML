@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+This example creates a KML document to display information about 
+house prices in different cities in the Bay Area.
+Rather than showing all the houses as individual placemarks,
+we have a placemark for each city.
+The viewer can click on that placemark and we display a
+time series of the median price per square foot for the houses
+sold in that city.
+
+</para>
+<para>
+We start by loading and cleaning the data
+<r:code>
+library(RKML)
+library(XML)
+
+if(!exists('housing')) {
+  load("~/Data/housing.Rda")
+
+  housing$city[ housing$city == "`vallejo" ] = "Vallejo"
+  housing$city[ housing$city == "`san Rafael" ] = "San Rafael"
+  housing = subset(housing, city != "")
+  housing$city = factor(as.character(housing$city))
+}
+</r:code>
+</para>
+<para>
+Next we compute the locations of the "centers" of each city by computing
+the median pair of longitude and latitude:
+<r:code>
+locations = by(housing, housing$city,
+                   function(x)
+                      c(median(x$long, na.rm = TRUE), median(x$lat, na.rm = TRUE)))
+</r:code>
+
+</para>
+<para>
+We will create a time series plot of the median price per square foot for
+each city and display on that plot the same statistic for the entire Bay Area.
+To do this, we compute the price per square foot for each week for the entire
+Bay Area just once.  We also compute the weeks as dates so we can plot them.
+<r:code>
+overall.prsqft = with(housing, by(price/bsqft, cut(date, "weeks"), median, na.rm = TRUE))
+overall.dates = as.Date(gsub(" .*", "", levels(cut(housing$date, "weeks"))), "%Y-%m-%d")
+</r:code>
+
+Now we can create the time series plot for each city.
+We create a function to do this.
+This takes the observations for a city and creates the plot.
+By default, it creates a PNG file using the name of the city for the file name.
+We have written the function so that it can plot on an existing graphics device.
+This helps in debugging.
+We also allow the caller to control whether we display additional separate
+time series for the different number of bedrooms.
+<r:function><![CDATA[
+colors = rainbow(10) # max(housing$br, na.rm = TRUE))
+
+makeCityPlot =
+function(x, ylim = range(housing$price/housing$bsqft, na.rm = TRUE), 
+          addBedroomSeries = FALSE, toFile = TRUE)
+{
+   # we may have too little data, i.e. only one week or al NAs for the prices or bsqft
+  when = cut(x$date, "weeks")
+  if(length(levels(when)) < 2)
+    return(NA)
+       
+  price = by(x$price/x$bsqft, when, median, na.rm = TRUE)
+  if(all(is.na(price)))
+    return(NA)
+
+   # arrange to draw to a file if toFile is TRUE, otherwise the screen
+  cityName = as.character(x$city[1])
+  if(toFile) {
+    fname = sprintf("%s.png", gsub("[ /]", "_", cityName))
+    png(fname)
+    on.exit(dev.off())
+  } else
+    fname = NA
+
+    # Draw the plot for the median price/sqft for this 
+  dates = as.Date(gsub(" .*", "", levels(when)), "%Y-%m-%d")
+  plot(dates, price, type = if(any(is.na(price))) "o" else "l",
+       xlab = "Date", ylab = "$ per square foot", main = cityName,
+       ylim = ylim, lwd = if(addBedroomSeries) 2 else 1)
+
+  lines(overall.dates, overall.prsqft, lty = 3, col = "green")
+  rug(as.Date(x$date), col = "red")
+
+    # Draw a time series of median price/sqft for houses with the same number of bedrooms
+    # and do this for the different number of bedrooms.
+  if(addBedroomSeries) {
+    x = subset(x, !is.na(br) & br <= length(colors))
+    by(x, x$br,
+       function(pr) {
+         if(nrow(pr) == 1 || length( w <- cut(pr$date, "weeks") ) == 0)
+           return()
+            # compute the median price for each week
+         vals = by(pr$price/pr$bsqft, w, median, na.rm = TRUE)
+
+         lines(as.Date(gsub(" .*", "", levels(w)), "%Y-%m-%d"), vals, lty = "dashed", col = colors[pr$br[1]])
+       })
+  }
+
+  fname
+}
+]]></r:function>
+
+We can now use this function to create the different plots:
+<r:code>
+pics = by(housing, housing$city,
+           makeCityPlot,
+          ylim = c(0, with(housing, quantile(price/bsqft, .95, na.rm = TRUE))),
+          addBedroomSeries = FALSE)
+</r:code>
+As usual, we want to check we get the correct results before proceeding:
+<r:code>
+any(is.na(pics))
+locations[!is.na(pics)]
+</r:code>
+
+</para>
+<para>
+We are now ready to create the KML document.
+We will construct the <xml:tag>Placemark</xml:tag> nodes
+directly (rather than using the <r:func>kml</r:func> function).
+We create the stub of a KML document via <r:func>createKMLDoc</r:func>
+We specify the name of the document and provide a description.
+These are displayed in the "Places" view of the KML user interface.
+We also specify where Google Earth should move to when the KML file is opened.
+The code is 
+<r:code>
+doc = createKMLDoc("City Housing Prices", "Median housing prices per square foot for each city for each week",
+                    window = c(longitude = median(housing$long, na.rm = TRUE),
+                               latitude = median(housing$lat, na.rm = TRUE)))
+</r:code>
+We now create a <xml:tag>Folder</xml:tag> node to contain our <xml:tag>Placemark</xml:tag> elements:
+<r:code>
+folder = newXMLNode("Folder", newXMLNode("name", "Cities"), parent = xmlRoot(doc)[["Document"]])
+</r:code>
+
+We write a function to create a <xml:tag>Placemark</xml:tag>.
+The function takes the name of the file containing
+the time series plot for that city, the location
+of the city as a numeric vector of length 2,
+the name of the city and the number of houses sold in that 
+city over the period the data covers.
+It also takes the <xml:tag>Folder</xml:tag> node 
+to which the <xml:tag>Placemark</xml:tag> should be added as a child.
+The function is 
+
+<r:function><![CDATA[
+makePlacemark =
+function(img, loc, cityName, count, folder = NULL)
+{
+  if(is.na(img))
+    return(NULL)
+  pl = newXMLNode("Placemark", parent = folder)
+  newXMLNode("name", cityName, parent = pl)
+  desc = sprintf('<h2>%s</h2>\nNumber of houses sold: %d<br/><img src="%s">', cityName, count, img)
+  newXMLNode("description", newXMLCDataNode(desc), parent = pl)
+  newXMLNode("Point",
+              newXMLNode("coordinates", paste(loc[1], loc[2], 0, sep = ",")),
+             parent = pl)
+  pl
+}
+]]></r:function>
+
+So we can use this to create the <xml:tag>Placemark</xml:tag> nodes with
+<r:code>
+invisible(mapply(makePlacemark, pics, locations, names(locations), table(housing$city), MoreArgs = list(folder)))
+</r:code>
+
+And finally we write the KML document to a file:
+<r:code>
+saveXML(doc, "cityHousePrices.kml")
+</r:code>
+
+</para>
+
+</section>
+</article>

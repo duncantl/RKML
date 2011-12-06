@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Events on Google Earth</title>
+  <!-- *** Replace the key below below with your own API key, available at http://code.google.com/apis/maps/signup.html *** -->
+  <script src="http://www.google.com/jsapi?key=ABQIAAAA1B7-T_eODjyG26oH5xy41RTZCIJJEZ3PG_sAyP_6ojhjIWTOGBQlLoZky-wJQJKX_jMl92EWSc1A2g"></script>
+  <script rel="text/javascript" src="geInitSVG.js"></script>
+  <link rel="stylesheet" href="basic.css"></link>
+</head>
+
+<body onload='init()' id='body'>
+<h1></h1>
+
+The idea is that the viewer can mouse over any of the lines in the
+plot on the right and the Google Earth view will move to display
+that city.
+Note that when you click on the Google Earth  panel and generally
+interact with that panel directly, that takes the "focus".
+When you later move the mouse over the HTML document or
+the SVG plot, you will have to explicitly click on
+that are to have events triggered.
+
+<!-- This is how we would arrange the two displays in a table.
+     While more straightforward, it is a lot less flexible and undesirable.
+<table>
+  <tr><td>
+<div id='myGE' class="ge" style='border: 3px solid silver; height: 600px; width: 800px;'></div>
+</td><td>
+<object id="PlotID" data="cityTemps.svg" 
+        type="image/svg+xml" width="960" height="800"/>    
+</td></tr>
+</table>
+-->
+
+<div id="panels">
+ <div id='myGE' class="ge" style='border: 3px solid silver; height: 600px; width: 600px; float: left;'></div>
+
+ <object id="PlotID" data="cityTemps.svg" type="image/svg+xml"
+width="760" height="600" style="float:left; border: 3px solid silver; "/>    
+</div>
+
+<!-- The following gets us out of the float mode and stacks things
+     vertically again. -->
+<div style="clear:both;"/>
+
+<hr>
+<address><a href="http://www.stat.ucdavis.edu/~duncan">Duncan Temple Lang</a>
+<a href=mailto:duncan@wald.ucdavis.edu>&lt;duncan@wald.ucdavis.edu&gt;</a></address>
+<!-- hhmts start -->
+Last modified: Mon Jan 17 17:03:17 PST 2011
+<!-- hhmts end -->
+</body> </html>

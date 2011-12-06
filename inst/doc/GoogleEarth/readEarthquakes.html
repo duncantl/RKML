@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title></title><link rel="stylesheet" href="/Users/duncan/Classes/StatComputing/XDynDocs/inst/CSS/OmegaTech.css" type="text/css"></link><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></meta><script xmlns="" type="text/javascript" src="http://www.omegahat.org/DynDocs/JavaScript/toggleHidden.js"></script>
+</head><body class="yui-skin-sam">
+<script xmlns="" type="text/javascript"><!--
+var toggleCodeIds = [
+ 
+   "id656112", 
+   "id656124", 
+   "id656157", 
+   "id656178", 
+   "id656198", 
+   "id656212", 
+   "id656226", 
+   "id656236", 
+   "id656247", 
+   "id656271", 
+   "id656275", 
+   "id656279", 
+   "id656283", 
+   "id656287"
+];
+--></script><p xmlns=""><div class="toggleControls"><a class="toggleAll" onclick="toggleAll(toggleCodeIds)" title="toggle display of all code chunks">+</a></div></p>
+<div class="article"><div class="titlepage"><div><div><h2 class="title"><a id="id594813"></a></h2></div><div><div class="author"><h3 class="author"><span class="firstname">Duncan</span> <span class="surname">Temple Lang</span></h3><div class="affiliation"><span class="orgname">University of California at Davis<br></br></span> <span class="orgdiv">Department of Statistics<br></br></span></div></div></div></div><hr></hr></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id656106"></a></h2></div></div></div><p>
+
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656112')" id="id656112" title="toggle the display of code (id = id656112)">+</a><div class="unhidden" id="id656112"><div><pre class="rcode" title="R code">
+library(XML)
+dir = "~/Books/XMLTechnologies/XSL/examples/Earthquakes/"
+doc = xmlParse(sprintf("%s%s", dir, "2004_Earthquakes_ALL.kml"))
+</pre></div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+We get all the <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;Placemark&gt;</font> nodes under the <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;Folder&gt;</font> nodes.
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656124')" id="id656124" title="toggle the display of code (id = id656124)">+</a><div class="unhidden" id="id656124"><div><pre class="rcode" title="R code">
+pl = getNodeSet(doc, "//kml:Folder/kml:Placemark", "kml")
+</pre></div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+Now we extract the longitude and latitude, the magnitude, etc.
+
+</p><p>
+Before we do this, let's just test one thing.
+Which is faster: getting the <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;Placemark&gt;</font> nodes
+once and then working on these to extract their children in R,
+or to use XPath many times to get each of the different elements in the document
+that we want, <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;coordinates&gt;</font>, <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;description&gt;</font>, <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;name&gt;</font>
+within in each <font xmlns:xp="http://www.w3.org/TR/xpath" xmlns="" class="xmlTag">&lt;Placemark&gt;</font>.
+Let's time these
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656157')" id="id656157" title="toggle the display of code (id = id656157)">+</a><div class="unhidden" id="id656157"><div><pre class="rcode" title="R code">
+system.time({desc = sapply(pl, function(x) xmlValue(x[["description"]]))})
+<pre class="routput">
+   user  system elapsed 
+ 18.411   0.972  35.986 
+</pre>
+system.time({desc1 = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:description", xmlValue, namespaces = "kml")})
+<pre class="routput">
+   user  system elapsed 
+  0.711   0.052   1.262 
+</pre>
+all(desc1 == desc)
+</pre></div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+So it is much faster (in this context) to use XPath many times
+rather than using R to access the children by name.
+Accessing by index may be different.
+
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656178')" id="id656178" title="toggle the display of code (id = id656178)">+</a><div class="unhidden" id="id656178"><div><pre class="rcode" title="R code">
+system.time({desc = sapply(pl, function(x) xmlValue(x[[2]]))})
+<pre class="routput">
+   user  system elapsed 
+ 10.201   0.697  17.039 
+</pre>
+</pre></div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+</p></div><div class="section" title="Reading one File"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="oneFile"></a>Reading one File</h2></div></div></div><p>
+
+
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656198')" id="id656198" title="toggle the display of code (id = id656198)">+</a><div class="unhidden" id="id656198"><div>
+<a class="r-code-chunk-name" name="magnitude"></a><pre class="rcode" title="R code ID: magnitude">
+nm = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:name", xmlValue, namespaces = "kml")
+#nm = sapply(pl, function(x) xmlValue(x[["name"]]))
+mags = gsub("^M (None|[0-9.]+) -.*", "\\1", nm)
+mags[mags == "None"] = "0"
+magnitude = as.numeric(mags)
+# Check the results
+sum(is.na(magnitude)) == 0
+table(floor(magnitude))
+</pre>
+</div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+</p><p>
+Now get the depth from the HTML content in the description.
+
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656212')" id="id656212" title="toggle the display of code (id = id656212)">+</a><div class="unhidden" id="id656212"><div>
+<a class="r-code-chunk-name" name="description"></a><pre class="rcode" title="R code ID: description">
+desc = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:description", xmlValue, namespaces = "kml")
+# desc = sapply(pl, function(x) xmlValue(x[["description"]]))
+getDepthStringFromDesc = 
+function(x) { 
+  hdoc = htmlParse(x, asText = TRUE)
+  xmlValue(getNodeSet(hdoc, "//tr[2]/td/font")[[1]])
+}
+str = sapply(desc, getDepthStringFromDesc)
+depth = as.numeric(gsub(" .*", "", str)) # strip names
+sum(is.na(depth))
+</pre>
+</div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+</p><p>
+Let's get the date
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656226')" id="id656226" title="toggle the display of code (id = id656226)">+</a><div class="unhidden" id="id656226"><div>
+<a class="r-code-chunk-name" name="dates"></a><pre class="rcode" title="R code ID: dates">
+dates = unlist(getNodeSet(doc, "//kml:Folder/kml:Placemark/@id", "kml"))
+dates = as.POSIXct(strptime(dates, "%Y %b %d %H:%M:%S %Z"))
+</pre>
+</div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+</p><p>
+Now the longitude and latitude
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656236')" id="id656236" title="toggle the display of code (id = id656236)">+</a><div class="unhidden" id="id656236"><div>
+<a class="r-code-chunk-name" name="coordinates"></a><pre class="rcode" title="R code ID: coordinates">
+coords = xpathSApply(doc, "//kml:Folder/kml:Placemark/kml:Point/kml:coordinates", xmlValue, namespaces = "kml")
+locations = t(sapply(strsplit(coords, ","), function(x) x[1:2]))
+</pre>
+</div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+</p><p>
+Now we assemble the data frame
+
+</p><div xmlns="" class="codeToggle">
+<a class="toggleLink" onclick="toggle('id656247')" id="id656247" title="toggle the display of code (id = id656247)">+</a><div class="unhidden" id="id656247"><div>
+<a class="r-code-chunk-name" name="assemble"></a><pre class="rcode" title="R code ID: assemble">
+eq = data.frame(dates = dates, depth = depth, magnitude = magnitude)
+eq$longitude = as.numeric(locations[,1])
+eq$latitude = as.numeric(locations[,2])
+</pre>
+</div></div>
+</div>
+<div xmlns="" class="clearFloat"></div>
+<p>
+
+</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="readFunctionDefn"></a></h2></div></div></div><p>
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">
+readKMZEarthquakes =
+function(doc)
+{
+ if(is.character(doc)) {
+   if(length(grep("^http.*kmz$", doc))) {
+       doc = xmlParse(getKMZURL(doc), asText = TRUE)
+   } else
+       doc = xmlParse(doc)
+ }
+
+cat("parsed the XML file\n")
+ 
+  &lt;&lt;<a class="r-code-chunk-ref" href="#magnitude">magnitude</a>&gt;&gt;
+ 
+ 
+  &lt;&lt;<a class="r-code-chunk-ref" href="#dates">dates</a>&gt;&gt;
+ 
+ 
+  &lt;&lt;<a class="r-code-chunk-ref" href="#description">description</a>&gt;&gt;
+ 
+ 
+  &lt;&lt;<a class="r-code-chunk-ref" href="#coordinates">coordinates</a>&gt;&gt;
+ 
+ 
+  &lt;&lt;<a class="r-code-chunk-ref" href="#assemble">assemble</a>&gt;&gt;
+ 
+ eq
+}
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+</p><p>
+
+</p><pre xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="" class="rfunction">
+getKMZURL =
+function(doc, readXML = TRUE)
+{
+  kmz = getURLContent('http://neic.usgs.gov/neis/epic/kml/2009_Earthquakes_ALL.kmz')
+  ar = zipArchive(kmz)
+  if(readXML)
+    invisible(xmlParse(ar[[1]], asText = TRUE))
+   else
+     ar
+}
+</pre>
+<p><br xmlns:s3="http://www.r-project.org/S3" xmlns:cpp="http://www.cplusplus.org" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="">
+
+</p></div></div></body></html>

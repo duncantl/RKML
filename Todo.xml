@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="/Users/nolan/EMD/StatComputing/trunk/XDynDocs/inst/XSL/OmegahatXSL/Todo.xsl" ?>
+
+<topics xmlns:r="http://www.r-project.org">
+<title>RKML</title>
+
+<topic>
+<items>
+
+<item>
+allow col parameter in kmlPoints()  to be colors and turn these into icons and styles.
+</item>
+
+<item>
+makeBallIcon should be vectorized.
+</item>
+<item>
+makeBallIcon should come up with a better default name.
+</item>
+
+<item>
+groups: this parameter is not recognized by kmlPoints() 
+</item>
+<item>
+Fix up changes to argument names, e.g. col to style.
+</item>
+
+<item status="check">
+The zipping procedure finds the files and puts them in a directory
+structure that does not match the directory structure of the original files. 
+In particular, the hrefs for the local files in doc.kml are not correct
+(they point to the original file locations). Take cityTemps for example.  
+The images for the ground overlay are located in tests/images. When the 
+kmz file is created they are moved into the same directory as the doc.kml file,
+but the hrefs still point to tests/images/.
+>>>>>>> .r1484
+<br/>
+See tests/save.R
+</item>
+
+<item status="check">
+Conditioning variable in the formula language does not seem to do anything. What I think that it should do is create folders, one for each level of the conditioning variable, and place the Placemark elements in the folder corresponding to the value of the conditioning variable. (This is what groups does, but I think it should do something else -- see other To Do item)
+<br/>
+Where would we have an image. Is this img in HTML content?
+KML has no image!
+</item>
+
+<item>
+groups parameter - I think that is should be used to change the style of the Icon for a point. There should be one style for each level of the grouping variable. WE can create a set of colored dots to be used so that they don't have to be supplied.
+However, they can also be supplied through the col parameter. For example, if the length of the col parameter matches the number of levels in the grouping variable then
+we take them to be the styles to use.  They could even contain color names, if we wanted to support them (for the future).
+</item>
+
+<item>
+Change the col parameter in kmlPoints and kmlTime to be called "style", and change the "style" parameter to be called "docStyle".  Then fix all the code that uses these old parameter names.
+</item>
+
+<item>
+Allow the location of the png and other files for the document to be in a different
+place then where you want them to be at the time of the kmz file creation. 
+That is, we want to be able to specify the location of the input images and the location of the images in the kmz. 
+</item>
+
+<item>
+When use the kmlLegend function the quartz device opens even though it is not used.
+</item>
+
+<item>
+Change the default for kmlTime to drop the hour:minutes:second 
+or to drop off the names from the points??
+</item>
+
+<item>
+Add to the package a set of differently colored balls.
+</item>
+
+<item status="check">
+<<<<<<< .mine
+Make sure all the main functions use the text approach to building the kml so 
+that it is faster (i.e. add the nodes in a lump after they have been created)
+=======
+Have makeKMZArchive() look for images in the
+HTML code in description elements.
+Also links to local documents in a href="..."
+<br/>
+See htmlLocalRefs.R and getHTMLLocalFileRefs.
+Need to implement update to change the content.
+>>>>>>> .r1484
+</item>
+
+<item status="check">
+Why isn't addLines a parameter in kmlTime - instead of in the ... argument?
+</item>
+
+<item>
+Shouldn't we have the addLines parameter to kmlPoint too?
+</item>
+
+<item>
+Note: There can be only oneDocument element in a kml file
+</item>
+
+</items>
+</topic>
+</topics>

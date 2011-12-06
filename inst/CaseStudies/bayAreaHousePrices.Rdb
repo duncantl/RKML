@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title></title>
+
+<para>
+This is an example of creating a KML display for Google Earth.
+We use the housing price data and, for simplicity, use just
+the houses sold in Marin county. 
+We have a Placemark for each house and use the 
+street address as the label displayed for that placemark.
+When the viewer clicks on the placemark, we display a simple
+HTML table giving the details of that observation.
+This is a subset of the variables we have for that house.
+</para>
+<para>
+We start by loading the housing data
+<r:code>
+library(RKML)
+load("~/Data/housing.Rda")
+</r:code>
+
+We compute a subset of the data to reduce the number of points.
+<r:code>
+# marin = subset(housing, county == "Marin County")
+housing = subset(housing, county == "Marin County")
+</r:code>
+
+</para>
+<para>
+Now we are ready to focus on creating the KML.
+We need to create the names and the HTML descriptions for each placemark.
+The names are just the string versions of the street names
+<r:code>
+ids = as.character(housing$street)
+</r:code>
+
+The HTML description for a given house involves
+constructing an HTML <xml:table>table</xml:table>
+with a row for each of the variables.
+Each row has the name of the variable and then the value.
+We construct this as a string (rather than XML nodes).
+This is done with the following function
+
+<r:function><![CDATA[
+makePropDesc =
+   function(row) {
+      tmp = sprintf("<tr><td>%s</td><td>%s</td></tr>", names(row), row)
+      paste(c("<table>", tmp, "</table>"), collapse = "\n")
+   }
+]]></r:function>
+
+We can then use this function for each observation in our data set using <r:func>apply</r:func>
+<r:code>
+description =
+  apply(housing[, c("city", "zip", "street", "price", "br", "lsqft", "bsqft", "year", "date")], 1,
+         makePropDesc)
+</r:code>
+
+We need to check the values in description are what we expect.
+</para>
+<para>
+Now we have the relevant pieces for constructing our KML document.
+We can use the <r:func>kml</r:func> function. We specify
+a formula and a data set. The formula specifies which variables in the dataset
+are the longitude and latitude.
+<r:code>
+doc = kml(~ long + lat, housing, .names = ids, description = description)
+</r:code>
+
+Now we have the KML document as a tree in R.
+We write it to a file using <r:func>saveXML</r:func>.
+<r:code>
+#saveXML(doc, "marin.kml", fixHTMLRefs = FALSE)
+</r:code>
+We can then load it into Google Earth or put in on a web site or
+email it to somebody.
+</para>
+
+<para>
+We could do this for all houses in the data set and not just
+Marin county. Or we might want to split the observations into a separate
+folder for each citty. This would allow the viewer to easily hide
+or display all the houses for a given city.
+We can do this using the by turning our code above into
+a function and using the <r:func>by</r:func> function.
+Alternatively, we can use a conditioning variable in our formula,
+e.g.
+
+<r:code>
+doc = kml(~ long + lat | city, housing, .names = ids, description = description)
+#saveXML(doc, "marinByCity.kml", fixHTMLRefs = FALSE)
+</r:code>
+<note><para>This is not working at present.
+Also, if we specify city as the group argument, we don't look in the data for that variable.</para></note>
+
+</para>
+<para>
+We also may want to use a different colored icon for each placemark.
+For instance, we might use a color to indicate the price (as a categorical variable).
+</para>
+
+
+</section>
+</article>

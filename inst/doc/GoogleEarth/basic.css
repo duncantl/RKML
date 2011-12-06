@@ -1,0 +1,15 @@
+BODY {
+  background: #FFF;
+  margin-left: 1em; /* # 1%; */
+  margin-right: 3em; /* #10%;  */
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.ge {
+  border: 1px solid red;    
+  clear: left;
+}
+
+h1 {
+  color: #FF0000;   
+}

@@ -1,0 +1,21 @@
+Package: RKML
+Version: 0.8-0
+Title:  Simple tools for creating KML displays from R
+Description:  This is a collection of some general
+  and quite simple facilities for creating KML content 
+  to display in Google Earth from R. 
+  This provides a formula mechanism for identifying longitude
+  and latitude, time and groups.
+  The intent of the package is to illustrate how we can programmatically
+  generate KML content from within R. There are many more things we can do
+  including placing plots generated in R in KML displays. This is more a "proof of concept"
+  and a start for others to build upon.
+Note: This is an interface that uses the XML package and creates the KML content directly in R.
+   One can also use the C++ library libkml
+Depends: XML, methods
+Imports: graphics
+Suggests: Rcompression
+Author: Duncan Temple Lang, Deborah Nolan 
+Maintainer: Duncan Temple Lang <duncan@r-project.org>
+License: BSD
+

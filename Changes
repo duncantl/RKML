@@ -1,0 +1,105 @@
+
+Version 0.7-1
+
+   *   Add folderNames() function and methods.
+
+   *   Added template HTML and JavaScript code for creating a Web page with Google Earth plugin instance
+       embedded.
+
+   *   Functions to access these plugin templates and insert API key and target KML file.
+
+   *   Handle the case in kmlPoints() where we do not specify data and specify .longitude and .latitude.
+
+Version 0.7-0
+
+   *   Clarified the description and docDescription in kml() and some of the related functions
+       so that the previous description is now docDescription.
+
+   *   Fixed the creation of the KMZ archive and adjusting the references to local files and saving them.
+
+   *   Added functions to create icons for use as placemarks, etc.
+
+   *   Use CDATA for description nodes.
+
+Version 0.6-1
+
+   *  Fixed some examples to not use /tmp/ directory.
+
+Version 0.6-0
+
+   *  Support for time spans in formula. TimeSpec and TimeSpanSpec classes ('Spec' for specification).
+
+   *  Allow for specifying ids or labels for observations.
+
+   *  Allow for namespace on root node of KML document in createKMLDoc().
+
+Version 0.5-0
+
+   *  kmlTime() creates a new level for missing values in the groups argument.
+
+   *  Default value for addLines in kmlTime() is now FALSE.
+
+   *  Added a simpler, faster, leaner version of newXMLNode() for this package
+      to speed up creating XML documents.
+
+   *  Added a much faster implementation of kmlTime() and specifically addFolderPlacemarks()
+      that constructs the XML content using a string and then parses that into nodes and adds
+      these.
+
+   *  Similar approach and massive speedup for kmlPoints() for large number of <Placemarks>.
+
+Version 0.4-2
+ 
+   *  kmlTime() doesn't add extraneous <Placemark> elements if addLines = FALSE
+
+   *  kmlTime() doesn't add a <StyleUrl> element if the style is NA.
+
+Version 0.4-1
+
+   *  If makeKMZArchive() (typically called via saveXML()) cannot find all the local files
+      it creates a KML file with the expectation that the file will be created subsequently. 
+
+   *  makeKMZArchive() now clones the document if appropriate (using xmlClone())
+
+   *  more warning messages from makeKMZArchive(), e.g. if any of the local files 
+      mentioned in the KML document don't exist.
+
+   *  handle difference between <Icon>file name</Icon> and 
+      <Icon><href>filename</href></Icon> better.
+
+Version 0.4-0
+
+   *  Added kmlLegend() function to allow inclusion of an existing image or creating an 
+      R-style legend to place on Google Earth.
+
+   *  Added kmlPolygon(), kmlText(), for drawing graphical elements onto the KML display.
+
+   *  kmlLegend() for displaying a legend on the KML display.
+
+   *  groundOverlay() for adding an image as a ground overlay
+
+   *  Map local file names when creating KMZ files to sub-directories with the 
+      ZIP archive.
+
+   *  saveXML() method for creating regular KML files for AsIs file names (rather than KMZ files if
+      the KMLDoc contains local files)
+
+   *  Prototype/initial implementation of a KML device for rendering R graphics on a KML display
+      as objects, not just via an image as a ground overlay. See inst/KMLDevice/kmlDevice.R.
+
+
+Version 0.3-0
+ 
+   *  We use the latest version of the Rcompression package to create KMZ (zip)
+      files directly in R rather than via an external zip program.
+
+Version 0.2-0
+
+   * additional facilities for kmlTime() and kmlPoints() for specifying
+     the names and descriptions  for the points and also not connecting
+     each point in time.
+
+   * extensions to the formula parsing to recognize time and also evaluate
+     expressions (e.g. - longitude  or long + sqrt(lat) @ I( 2 * times)
+
+   * Added kmlCircle() and kmlSegments().

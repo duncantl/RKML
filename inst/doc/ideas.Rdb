@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+</articleinfo>
+
+<section>
+<title>GE embedded in HTML</title>
+
+<para>
+We could display, e.g., earthquakes on the map
+for 37 years. (See http://neic.usgs.gov/neis/epic/kml/).
+We have magnitude, depth, location and time.
+We can allow 
+
+</para>
+
+
+<para>
+Load GE into the browser.
+
+Bring up the controls
+
+Display a KML document with Timestamp elements
+  The time slider will automatically appear
+
+Display a scatterplot in a different part of the HTML page.
+
+Respond to events on the time slider.
+  Update the scatter plot to reflect the time period in the 
+  slider.
+
+R draws the plots into an embedded graphics device.
+  Spews JavaScript code to a canvas. 
+  Or an SVG document.
+
+Make the R device interactive too and respond to events
+with JavaScript functions that can call R.
+
+
+
+</para>
+
+
+<para>
+This does not seem possible at present (Nov 15 2009).
+We don't seem to be able to get events from the "time slider"
+in the GE plugin. Hopefully this will change.
+</para>
+
+
+<para>
+The GE instance is a  "xpconnect wrapped native prototype"
+This is the type of object that we a) want to receive in R
+and whose methods we want to be able to invoke,
+b) want to be able to export from Rto a JavaScript function.
+</para>
+
+
+
+</section>
+
+<section>
+<title></title>
+
+<para>
+JavaScript within HTML displayed in a balloon.
+</para>
+</section>
+
+</article>
